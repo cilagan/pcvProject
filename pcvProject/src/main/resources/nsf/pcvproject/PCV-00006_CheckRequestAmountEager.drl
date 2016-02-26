@@ -1,0 +1,30 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00006_CheckRequestAmountEager"
+when
+
+	$proposal : Proposal( 
+		$submission : submission != null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD, 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA", 
+		$fundingMechanism: fundingMechanism != null, fundingMechanism == "EAGER", 
+		//Only check the requested amount on the Remainder of Cover Sheet
+		$coverSheet : coversheet != null, coversheet.requestedBudgetAmount > 300000, 
+		//	|| calculateBudgetTotal(budget, $primaryOrgId).compareTo(new BigDecimal(300000)) > 0,
+		$findings : proposalFindings
+	)
+then
+
+        ProposalFinding $proposalFinding = new ProposalFinding();
+        $proposalFinding.setFindingCode("PCV-00006");
+        $proposalFinding.setFindingLevel(FindingLevel.ERROR);
+        $proposalFinding.setMessage("Requested Amount Exceeds Limit - The requested amount indicated in the \"Remainder of the Cover Sheet\" or the Budget exceeds the maximum amount for a EAGER proposal. The total amount cannot exceed $300,000. To correct this error, please update the budget and the new requested amount will be reflected on the \"Remainder of  the Cover Sheet\".");
+	insert($proposalFinding );
+        $proposal.getProposalFindings().add($proposalFinding);
+end        
+

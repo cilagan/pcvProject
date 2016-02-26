@@ -1,0 +1,23 @@
+package nsf.pcvproject;
+import java.math.BigDecimal
+
+function BigDecimal calculateParticipantSupportCosts(ParticipantSupportCost costs) {
+	BigDecimal total = new BigDecimal("0");
+	if (costs != null) {
+		if (costs.getSupportDollars() != null) {
+			total = total.add(costs.getSupportDollars());
+		}
+		if (costs.getTravelDollars() != null) {
+			total = total.add(costs.getTravelDollars());
+		}
+		if (costs.getSubsistenceDollars() != null) {
+			total = total.add(costs.getSubsistenceDollars());
+		}
+		if (costs.getOtherSupportDollars() != null) {
+			total = total.add(costs.getOtherSupportDollars());
+		}
+	}
+	return total;
+}
+
+

@@ -1,0 +1,53 @@
+package nsf.pcvproject;
+import java.util.List;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
+
+/*
+ * Checks if the budget justifications Subrecipient Organization Exists
+ * Check isSubrecipientBudgetExist before this, if no Second Budget will not run this function.
+ * Rules: activation-group : SubrecipientBudgetJustification
+ * @author lmao
+ * @since 11/05/2014
+ */
+function boolean isSubrecipientBudgetJustificationExist(Budget budget, SectionContent sectionContent, AwardeeOrganization awardeeOrg) {
+	//Skip check if no budget or no primaryOrgId
+	if(budget == null 
+		|| budget.getBudgetHeader() == null 
+		|| budget.getBudgetHeader().getBudgetListSize() == 0 
+		|| CollectionUtils.isEmpty(budget.getBudgetRecordList()) 
+		|| awardeeOrg == null
+		|| StringUtils.isBlank(awardeeOrg.getOrganizationId()))  
+		return true;
+
+	//No budgetJustifications, fire the rule
+	if (sectionContent == null 
+		|| CollectionUtils.isEmpty(sectionContent.getBudgetJustifications()))
+		return false;
+
+	String primaryOrgId = awardeeOrg.getOrganizationId();
+	List budgetRecords = budget.getBudgetRecordList();
+	List budgJustList = sectionContent.getBudgetJustifications();
+
+	//Loop through the budgetRecords find a second budgetRecord
+	for(int i = 0; i < budgetRecords.size(); i++) {
+		BudgetRecord br = (BudgetRecord)budgetRecords.get(i);
+		String performOrgId = br.getPerformingOrganizationId();
+		//look for a Second Budget
+		if(StringUtils.isNotBlank(performOrgId) && !StringUtils.equals(primaryOrgId, performOrgId)) {
+			//Loop through budgetJustifications to match InstId and Second Budget OrgId.
+			for(int j = 0; j < budgJustList.size(); j++) {
+				BudgetJustification bj = (BudgetJustification)budgJustList.get(j);
+				//look for sub-recipient Org 
+				if(StringUtils.isNotBlank(bj.getInstId()) 
+					&& StringUtils.equals(bj.getInstId(), performOrgId)
+					&& (bj.getSectionContentType() == SectionContentType.PDF 
+						|| bj.getSectionContentType() == SectionContentType.TEXT)) {
+					return true;  //Find the Second Budget Justification
+				}
+			}
+		}
+	}
+	return false;
+}
+

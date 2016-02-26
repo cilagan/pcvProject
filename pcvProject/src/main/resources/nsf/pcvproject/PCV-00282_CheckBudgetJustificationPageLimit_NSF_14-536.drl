@@ -1,0 +1,26 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00282_CheckBudgetJustificationPageLimit_NSF_14-536"
+when
+
+	 $proposal : Proposal( $submission : submission != null, 
+				submission.type == SubmissionType.FULL_PROPOSAL 
+				|| == SubmissionType.RENEWAL 
+				|| == SubmissionType.RENEWAL_ABR,  
+	$fundingOpportunity : fundingOpportunity != null, 
+		fundingOpportunity.fundingOpportunityId == "NSF 14-536", 
+	$sectionContent : sectionContent != null,
+	$budgetJustList : sectionContent.budgetJustifications != null,
+	$findings : proposalFindings );
+	eval(checkBudgetJustificationPageLimit($budgetJustList, 5, null));
+
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+	$proposalFinding.setFindingCode( "PCV-00282" );
+	$proposalFinding.setFindingLevel( FindingLevel.WARN);
+	$proposalFinding.setMessage( "Budget Justification Exceeds Page Limit - The Budget Justification entered exceeds the maximum allowable length of 5 pages for Program Solicitation 14-536" );
+	insert($proposalFinding );
+	$proposal.getProposalFindings().add($proposalFinding);
+end	
+

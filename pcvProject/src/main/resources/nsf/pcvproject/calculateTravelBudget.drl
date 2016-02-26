@@ -1,0 +1,14 @@
+package nsf.pcvproject;
+import java.math.BigDecimal
+
+function BigDecimal calculateTravelBudget(BudgetRecord budget) {
+	BigDecimal total = new BigDecimal("0");
+	if(budget.getDomesticTravelDollars() != null) {
+		total = total.add(budget.getDomesticTravelDollars());
+	}
+	if(budget.getForeignTravelDollars() != null) {
+		total = total.add(budget.getForeignTravelDollars());
+	}
+	return total;
+}
+

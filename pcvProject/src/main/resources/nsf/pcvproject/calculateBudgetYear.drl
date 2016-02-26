@@ -1,0 +1,38 @@
+package nsf.pcvproject;
+import java.util.List;
+import java.math.BigDecimal;
+
+function BigDecimal calculateBudgetYear(BudgetRecord budget) {
+	BigDecimal total = new BigDecimal("0");
+	// Section A: Senior Personnel
+	total = total.add(calculateSeniorPersonnelBudget(budget.getSnrPersonnelBudget()));
+	// Section B: Other Personnel
+	total = total.add(calculateOtherPersonnelBudget(budget.getPostDoctoralScholarBudget()));
+	total = total.add(calculateOtherPersonnelBudget(budget.getOtherProfessionalsBudget()));
+	total = total.add(calculateOtherPersonnelBudget(budget.getOtherSeniorPersonnelBudget()));
+	total = total.add(calculateOtherPersonnelBudget(budget.getGraduateStudentsBudget()));
+	total = total.add(calculateOtherPersonnelBudget(budget.getUndergraduateStudentsBudget()));
+	total = total.add(calculateOtherPersonnelBudget(budget.getSecretarialBudget()));
+	total = total.add(calculateOtherPersonnelBudget(budget.getOtherStaffBudget()));
+	// Section C: Fringe Benefits
+	if(budget.getFringeBenefitsDollars() != null) {
+		total = total.add(budget.getFringeBenefitsDollars());
+	}
+	// Section D: Equipment
+	total = total.add(calculateEquipmentBudget((List)(budget.getEquipmentCost())));
+	// Section E: Travel
+	total = total.add(calculateTravelBudget(budget));
+	// Section F: Participant support costs
+	total = total.add(calculateParticipantSupportCosts(budget.getParticipantSupportCost()));
+	// Section G: Other Direct Costs
+	total = total.add(calculateOtherDirectCosts(budget.getDirectCost()));
+	// Section I: Indirect Costs
+	total = total.add(calculateIndirectCosts((List)(budget.getIndirectCost())));
+	if(budget.getResidualFunds() != null) {
+		total = total.add(budget.getResidualFunds());
+	}
+
+	return total;
+}
+
+

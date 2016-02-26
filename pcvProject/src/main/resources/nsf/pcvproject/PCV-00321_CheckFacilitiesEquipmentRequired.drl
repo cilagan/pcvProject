@@ -1,0 +1,32 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00321_CheckFacilitiesEquipmentRequired"
+when
+
+	$proposal : Proposal( 
+		$submission : submission, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD, 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA", 
+		$fundingMechanism: fundingMechanism != null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Equipment" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$sectionContent : sectionContent != null, sectionContent.facilitiesEquipmentOtherResources == SectionContentType.MULTIPLE || == SectionContentType.EMPTY,
+		$findings : proposalFindings
+	)
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+	$proposalFinding.setFindingCode("PCV-00321");
+	$proposalFinding.setFindingLevel(FindingLevel.ERROR);
+	$proposalFinding.setMessage("No Facilities, Equipment, and Other Resources - The Facilities, Equipment, and Other Resources has not been provided and is required for RAPID, EAGER, Equipment, Research and Ideas Lab types of Funding Mechanisms. To correct this error, please upload the Facilities, Equipment, Other Resources for this proposal.");
+	insert($proposalFinding);
+	$proposal.getProposalFindings().add($proposalFinding);
+end

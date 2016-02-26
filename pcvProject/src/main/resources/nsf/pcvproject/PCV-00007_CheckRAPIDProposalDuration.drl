@@ -1,0 +1,27 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00007_CheckRAPIDProposalDuration"
+when
+    $proposal : Proposal( 
+		$submission : submission != null,
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD,
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA", 
+		$fundingMechanism: fundingMechanism != null, 
+			fundingMechanism == "RAPID", 
+		$coverSheet : coversheet != null, 
+		coversheet.proposalDurationInMonths > 12,
+		$findings : proposalFindings)
+then
+
+        ProposalFinding $proposalFinding = new ProposalFinding();
+        $proposalFinding.setFindingCode("PCV-00007" );
+        $proposalFinding.setFindingLevel(FindingLevel.WARN);
+        $proposalFinding.setMessage("Duration Exceeds 12 months - A duration greater than 12 months has been entered for the Proposal Duration on the \"Remainder of the Cover Sheet\".  The duration of a RAPID proposal cannot exceed 12 months. To correct this warning, please update the duration on the \"Remainder of the Cover Sheet\". " );
+	insert($proposalFinding );
+        $proposal.getProposalFindings().add($proposalFinding);
+end

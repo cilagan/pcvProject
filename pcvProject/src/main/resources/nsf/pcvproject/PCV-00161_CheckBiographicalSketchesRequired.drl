@@ -1,0 +1,34 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00161_CheckBiographicalSketchesRequired"
+
+when
+
+	$proposal : Proposal( 
+		$submission : submission != null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD,
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA", 
+		$fundingMechanism : fundingMechanism != null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Equipment" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$sectionContent : sectionContent != null, 
+			sectionContent.biographicalSketchesMissing == true, 
+		$findings : proposalFindings 
+	)
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+	$proposalFinding.setFindingCode("PCV-00161");
+	$proposalFinding.setFindingLevel(FindingLevel.ERROR);
+	$proposalFinding.setMessage("No Biographical Sketch(es)- Biographical Sketch(es) have not been provided and are required for all senior personnel for most Research, RAPID,EAGER, Ideas Lab, Equipment, Facility/Center and Fellowship types of Funding Mechanisms. A Biographical Sketch is required for all Senior personnel and each individual's biographical sketch must be uploaded as a single PDF file or inserted as text associated with that individual.");
+	insert($proposalFinding);
+	$proposal.getProposalFindings().add($proposalFinding);
+end

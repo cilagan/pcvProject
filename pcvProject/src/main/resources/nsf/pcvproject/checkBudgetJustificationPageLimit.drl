@@ -1,0 +1,26 @@
+package nsf.pcvproject;
+import java.util.List;
+
+/*
+ * Checks if any of the budget justifications are over the given page limit.
+ * If an orgId is provided, only budget justifications for that organization are checked.
+ */
+function boolean checkBudgetJustificationPageLimit(List budgJustList, int pageLimit, String orgId) {
+	boolean isOverPageLimit = false;	
+	if(budgJustList != null){
+		for(int i=0; i<budgJustList.size(); i++){
+		BudgetJustification bj = (BudgetJustification)budgJustList.get(i);
+			if(orgId != null) {
+				if(bj.getInstId() != null && orgId.equals(bj.getInstId())
+				&& bj.getPageCount() != null && bj.getPageCount() > pageLimit) {
+					isOverPageLimit = true;
+				}
+			} else if(bj.getPageCount() != null && bj.getPageCount() > pageLimit){	
+					isOverPageLimit = true;
+					//System.out.println("Budget Justification is over the page limit: " + bj.getPageCount() + "|" + i);
+			}
+		}
+	}
+	return isOverPageLimit;
+}
+

@@ -1,0 +1,16 @@
+package nsf.pcvproject;
+import java.util.List
+import java.math.BigDecimal
+
+function BigDecimal calculateEquipmentBudget(List equipment) {
+	BigDecimal total = new BigDecimal("0");
+	if (equipment != null) {
+		for (Object obj : equipment) {
+			EquipmentCost equip = (EquipmentCost) obj;
+			if (equip.getDollarRequested() != null) {
+				total =  total.add(equip.getDollarRequested());
+			}
+		}
+	}
+	return total;
+}

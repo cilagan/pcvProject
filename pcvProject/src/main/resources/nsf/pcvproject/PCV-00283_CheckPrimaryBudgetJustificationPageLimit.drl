@@ -1,0 +1,48 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00283_CheckPrimaryBudgetJustificationPageLimit"
+/*
+ * Activation-group "PrimaryBudgetJustification"
+ * - PCV-00281_BudgetJustificationPrimaryOrganizationRequired
+ * - PCV-00283_CheckBudgetJustificationPrimaryOrganizationPageLimit
+ * Run this rule after PCV-00281. If Primary Budget Justification missing will not check page limit.
+ */
+activation-group "PrimaryBudgetJustification"
+salience 0
+when
+
+	$proposal : Proposal ( 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA",
+		$submission : submission != null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD, 
+		$fundingMechanism : fundingMechanism !=null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Conference" 
+			|| == "Equipment"  
+			|| == "International Travel" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$sectionContent : sectionContent != null, 
+		$budgJustList : sectionContent.budgetJustifications != null, 				 
+		$awardeeOrg : awardeeOrganization != null, 
+		$primaryOrgId : awardeeOrganization.organizationId != null, 
+		//Check if the Primary Budget Justification exist.
+		isPrimaryBudgetJustificationExist($sectionContent, $awardeeOrg),
+		$findings : proposalFindings
+	);
+	eval(checkBudgetJustificationPageLimit($budgJustList, 3, $primaryOrgId));
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+	$proposalFinding.setFindingCode("PCV-00283");
+	$proposalFinding.setFindingLevel(FindingLevel.ERROR);
+	$proposalFinding.setMessage("Budget Justification for Primary Organization Exceeds Page Limit - The Budget Justification uploaded exceeds the maximum allowable length of 3 pages.");
+	insert($proposalFinding );
+	$proposal.getProposalFindings().add($proposalFinding);
+end

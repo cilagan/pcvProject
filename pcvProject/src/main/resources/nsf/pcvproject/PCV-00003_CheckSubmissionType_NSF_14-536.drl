@@ -1,0 +1,19 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00003_CheckSubmissionType_NSF_14-536"
+when
+	$proposal : Proposal( $submission : submission != null , 
+			submission.type == SubmissionType.COLLABORATIVE_LEAD
+				|| == SubmissionType.COLLABORATIVE_NON_LEAD,
+		$fundingOpportunity : fundingOpportunity != null, 
+		fundingOpportunity.fundingOpportunityId == "NSF 14-536",
+		$findings : proposalFindings)
+then
+        ProposalFinding $proposalFinding = new ProposalFinding();
+        $proposalFinding.setFindingCode( "PCV-00003" );
+        $proposalFinding.setFindingLevel( FindingLevel.ERROR);
+        $proposalFinding.setMessage( "Collaborative Status - Collaborative projects may only be submitted as a single proposal in which a single award is being requested.  The involvement of partner organizations should be supported through sub-awards administered by the submitting organization." );
+        
+	insert($proposalFinding );
+        $proposal.getProposalFindings().add($proposalFinding);
+end

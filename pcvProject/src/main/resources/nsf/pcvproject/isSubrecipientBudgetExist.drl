@@ -1,0 +1,32 @@
+package nsf.pcvproject;
+import java.util.List;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
+
+/*
+ * Checks if a second Budget exists
+ * Rules: activation-group : SubrecipientBudgetJustification
+ * @author lmao
+ * @since 12/01/2014
+ */
+function boolean isSubrecipientBudgetExist(Budget budget, AwardeeOrganization awardeeOrg) {
+	if(budget == null 
+		|| budget.getBudgetHeader() == null 
+		|| budget.getBudgetHeader().getBudgetListSize() == 0 
+		|| CollectionUtils.isEmpty(budget.getBudgetRecordList()) 
+		|| awardeeOrg == null
+		|| StringUtils.isBlank(awardeeOrg.getOrganizationId()))  
+		return false;
+
+	List budgetRecords = budget.getBudgetRecordList();
+	String primaryOrgId = awardeeOrg.getOrganizationId();
+	for(int i = 0; i < budgetRecords.size(); i++) { 
+		BudgetRecord br = (BudgetRecord)budgetRecords.get(i);
+		String performingOrgId = br.getPerformingOrganizationId();
+		//Find a Subrecipient Organization Budget
+		if(!StringUtils.isBlank(performingOrgId) && !StringUtils.equals(primaryOrgId, performingOrgId)) 
+			return true;
+	}
+
+	return false;
+}

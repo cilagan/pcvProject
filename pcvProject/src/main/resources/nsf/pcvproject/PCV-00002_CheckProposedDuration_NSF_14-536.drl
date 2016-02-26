@@ -1,0 +1,22 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00002_CheckProposedDuration_NSF_14-536"
+when
+       $proposal : Proposal( $submission : submission != null , 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+				|| == SubmissionType.RENEWAL 
+				|| == SubmissionType.RENEWAL_ABR,
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityId == "NSF 14-536", 
+		$coverSheet : coversheet != null, 
+		coversheet.proposalDurationInMonths > 60,
+		$findings : proposalFindings)
+then
+        ProposalFinding $proposalFinding = new ProposalFinding();
+        $proposalFinding.setFindingCode( "PCV-00002" );
+        $proposalFinding.setFindingLevel( FindingLevel.WARN );
+        $proposalFinding.setMessage( "Proposal Duration greater than 60 months - A duration greater than 60 months has been entered for the Proposal Duration on the “Remainder of the Cover Sheet” form. The Foundation encourages PIs to request awards for durations of three to five years when such durations are necessary for completion of the proposed work and are technically and managerially advantageous. (NSF PAPG, GPG Chapter II.C.2.a)" );
+        
+	insert($proposalFinding );
+        $proposal.getProposalFindings().add($proposalFinding);
+end

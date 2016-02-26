@@ -1,0 +1,25 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00001_CheckRequiredAmount_NSF_14-536"
+when
+
+	$proposal : Proposal( $submission : submission != null , 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+				|| == SubmissionType.RENEWAL 
+				|| == SubmissionType.RENEWAL_ABR,
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityId == "NSF 14-536", 
+		$coverSheet : coversheet != null, 
+		coversheet.requestedBudgetAmount > 10000000,
+		$findings : proposalFindings)
+then
+
+        ProposalFinding $proposalFinding = new ProposalFinding();
+        $proposalFinding.setFindingCode( "PCV-00001" );
+        $proposalFinding.setFindingLevel( FindingLevel.WARN );
+        $proposalFinding.setMessage( "Requested Amount Exceeds Limit - The requested amount indicated  in the “Remainder of the Cover Sheet” form exceeds the maximum anticipated funding amount per award of $10,000,000 for Program Solicitation 14-536.  To correct this warning, please update the budget form and the new requested amount will be reflected on the “Remainder of Coversheet”." );
+        
+	insert($proposalFinding );
+        $proposal.getProposalFindings().add($proposalFinding);
+end
+

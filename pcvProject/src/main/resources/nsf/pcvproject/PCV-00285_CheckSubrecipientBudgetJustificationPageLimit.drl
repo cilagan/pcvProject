@@ -1,0 +1,52 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00285_CheckSubrecipientBudgetJustificationPageLimit"
+/*
+ * Activation-group "SubrecipientBudgetJustification"
+ * - PCV-00284_CheckSubrecipientBudgetJustificationRequired
+ * - PCV-00285_CheckSubrecipientBudgetJustificationPageLimit
+ * Run this rule after PCV-00284. 
+ * If Sub-recipient BudgetJustification missing will not check page limit.
+ */
+activation-group "SubrecipientBudgetJustification"
+salience 0
+when
+
+	$proposal : Proposal ( 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA",
+		$submission : submission != null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD, 
+		$fundingMechanism : fundingMechanism !=null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Conference" 
+			|| == "Equipment"  
+			|| == "International Travel" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$budget : budget != null, 
+		$awardeeOrg : awardeeOrganization != null, 
+		//Check sub-recipient budget existence.
+		isSubrecipientBudgetExist($budget, $awardeeOrg),
+		$sectionContent : sectionContent, 
+		//Check sub-recipient budget justification existence.
+		isSubrecipientBudgetJustificationExist($budget, $sectionContent, $awardeeOrg),
+		$primaryOrgId : awardeeOrganization.organizationId != null, 
+		$budgJustList : sectionContent.budgetJustifications != null,
+		$findings : proposalFindings
+	);
+	eval(checkBudgetJustificationPageLimitNonPrimary($budgJustList, 3, $primaryOrgId));
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+	$proposalFinding.setFindingCode("PCV-00285");
+	$proposalFinding.setFindingLevel(FindingLevel.ERROR);
+	$proposalFinding.setMessage("Budget Justification for Subrecipient Organization Exceeds Page Limit - The Budget Justification uploaded exceeds the maximum allowable length of 3 pages.");
+	insert($proposalFinding );
+	$proposal.getProposalFindings().add($proposalFinding);
+end

@@ -1,0 +1,33 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00141_CheckReferencesCitedRequired"
+when
+
+	$proposal : Proposal( 
+		$submission : submission != null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD, 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA",
+		$fundingMechanism: fundingMechanism !=null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Equipment" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$sectionContent : sectionContent != null, 
+			sectionContent.referencesCited == SectionContentType.MULTIPLE 
+			|| == SectionContentType.EMPTY, 
+		$findings : proposalFindings
+	)
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+	$proposalFinding.setFindingCode("PCV-00141");
+	$proposalFinding.setFindingLevel(FindingLevel.ERROR );
+	$proposalFinding.setMessage("No References Cited - The References Cited has not been provided and is required for RAPID, EAGER, Equipment, Research and Ideas Lab types of Funding Mechanisms. To correct this error, enter text or upload References Cited for this proposal. If submitting a separately submitted collaborative proposal, only the lead institution is required to provide the References Cited." );
+	insert($proposalFinding );
+	$proposal.getProposalFindings().add($proposalFinding);
+end

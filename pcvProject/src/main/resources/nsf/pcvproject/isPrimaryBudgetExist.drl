@@ -1,0 +1,33 @@
+package nsf.pcvproject;
+import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+
+
+/*
+ * Check if a Primary Budget exists
+ * Rule: CheckPrimaryBudgetRequired, BR24, PCV-00181
+ * @author lmao
+ * @since 12/03/2014
+ */
+function boolean isPrimaryBudgetExist(Budget budget, AwardeeOrganization awardeeOrg) {
+	if(budget == null 
+		|| budget.getBudgetHeader() == null 
+		|| budget.getBudgetHeader().getBudgetListSize() == 0 
+		|| CollectionUtils.isEmpty(budget.getBudgetRecordList()) 
+		|| awardeeOrg == null
+		|| StringUtils.isBlank(awardeeOrg.getOrganizationId()))  
+		return false;
+
+	List budgetRecords = budget.getBudgetRecordList();
+	String primaryOrgId = awardeeOrg.getOrganizationId();
+	for(int i = 0; i < budgetRecords.size(); i++) { 
+		BudgetRecord br = (BudgetRecord)budgetRecords.get(i);
+		String performingOrgId = br.getPerformingOrganizationId();
+		//Find a primary budget
+		if(StringUtils.equals(primaryOrgId, performingOrgId)) 
+			return true;
+	}
+
+	return false;
+}

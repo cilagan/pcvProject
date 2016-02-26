@@ -1,0 +1,36 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00181_CheckPrimaryBudgetRequired"
+when
+
+	$proposal : Proposal( 
+		$submission : submission != null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD, 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA", 
+		$fundingMechanism : fundingMechanism != null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Conference" 
+			|| == "Equipment"  
+			|| == "International Travel" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$budget : budget, 
+		$awardeeOrg : awardeeOrganization, 
+		!isPrimaryBudgetExist($budget, $awardeeOrg),
+		$findings : proposalFindings
+	)
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+	$proposalFinding.setFindingCode("PCV-00181");
+	$proposalFinding.setFindingLevel(FindingLevel.ERROR);
+	$proposalFinding.setMessage("Budget does not exist for each year of support requested - A Budget is required for each year of support requested for RAPID, EAGER, Conference, Equipment, International Travel, Research and Ideas Lab types of Funding Mechanisms. To correct this error, complete the Budget or use the Spreadsheet Support for this proposal. If there are no expenses in a  particular year of the project, please include a Budget in the amount of $0 for that year and provide an explanation in the Budget Justification.");
+	insert($proposalFinding);
+	$proposal.getProposalFindings().add($proposalFinding);
+end

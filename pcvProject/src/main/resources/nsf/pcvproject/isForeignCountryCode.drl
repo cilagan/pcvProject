@@ -1,0 +1,41 @@
+package nsf.pcvproject;
+function boolean isForeignCountryCode(String countryCode) {
+	if(countryCode.equalsIgnoreCase("US") ||
+		//American Samoa
+		countryCode.equalsIgnoreCase("AQ") ||
+		//Baker Island
+		countryCode.equalsIgnoreCase("FQ") ||
+		//Guam
+		countryCode.equalsIgnoreCase("GQ") ||
+		//Howland Island
+		countryCode.equalsIgnoreCase("HQ") ||
+		//Jarvis Island
+		countryCode.equalsIgnoreCase("DQ") ||
+		//Johnston Atoll
+		countryCode.equalsIgnoreCase("JQ") ||
+		//Kingman Reef
+		countryCode.equalsIgnoreCase("KQ") ||
+		//Midway Islands
+		countryCode.equalsIgnoreCase("MQ") ||
+		//Navassa Island
+		countryCode.equalsIgnoreCase("BQ") ||
+		//Northern Marianas Islands
+		countryCode.equalsIgnoreCase("CQ") ||
+		//Palmyra Atoll
+		countryCode.equalsIgnoreCase("LQ") ||
+		//Puerto Rico
+		countryCode.equalsIgnoreCase("RQ") ||
+		//US Virgin Islands
+		countryCode.equalsIgnoreCase("VQ") ||
+		//Wake Island
+		countryCode.equalsIgnoreCase("WQ")) {
+		System.out.println("false: " + countryCode);
+		return false;
+	} else {
+		System.out.println("true: " + countryCode);
+		return true;
+	}
+}
+
+
+

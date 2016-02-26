@@ -1,0 +1,32 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00301_CheckCurrentPendingSupportRequired"
+when
+   $proposal : Proposal(
+       $submission : Submission!= null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD, 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA",
+		$fundingMechanism : fundingMechanism !=null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Conference" 
+			|| == "Equipment" 
+			|| == "International Travel" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$sectionContent : sectionContent != null, sectionContent.currentPendingSupportMissing == true, 
+		$findings : proposalFindings
+	)
+then
+    ProposalFinding $proposalFinding = new ProposalFinding();
+	$proposalFinding.setFindingCode("PCV-00301");
+	$proposalFinding.setFindingLevel(FindingLevel.ERROR );
+	$proposalFinding.setMessage("No Current and Pending Support - Current and Pending Support information has not been provided and is required for most Research, RAPID, EAGER, Ideas Lab, Conference, Equipment, International Travel, Facility/Center and Fellowship types of Funding Mechanisms. Please upload each individual's Current and Pending Support information as a single PDF file or insert it as text associated with that individual.");
+	insert($proposalFinding);
+	$proposal.getProposalFindings().add($proposalFinding);
+end

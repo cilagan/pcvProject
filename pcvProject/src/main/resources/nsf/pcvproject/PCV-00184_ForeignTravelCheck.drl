@@ -1,0 +1,39 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00184_ForeignTravelCheck"
+when
+
+	$proposal : Proposal( 
+		$submission : submission != null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD, 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA", 
+		$fundingMechanism : fundingMechanism !=null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Conference" 
+			|| == "Equipment"  
+			|| == "International Travel" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$budget : budget != null,
+		$coverSheet : coversheet != null, 
+			coversheet.internationalCooperativeActivitiesCountriesExists==false,
+			calculateForeignTravelTotal($budget).compareTo(BigDecimal.ZERO) > 0,
+		$findings : proposalFindings)
+then
+
+        ProposalFinding $proposalFinding = new ProposalFinding();
+        $proposalFinding.setFindingCode("PCV-00184");
+        $proposalFinding.setFindingLevel(FindingLevel.WARN );
+        $proposalFinding.setMessage("International Activities Country Name(s) box is not checked - The International Activities Country Name(s) box is not checked on the \"Remainder of the Cover Sheet\" but the budget contains an amount in foreign travel line (E2). To correct this warning, please check the International Activities Country Name(s) box on the \"Remainder of the Cover Sheet\" and list the country/countries where international activities will take place."
+);
+        
+	    insert($proposalFinding );
+        $proposal.getProposalFindings().add($proposalFinding);
+end        
+

@@ -1,0 +1,49 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00284_CheckSubrecipientBudgetJustificationRequired"
+/*
+ * Activation-group "SubrecipientBudgetJustification"
+ * - PCV-00284_CheckSubrecipientBudgetJustificationRequired
+ * - PCV-00285_CheckSubrecipientBudgetJustificationPageLimit
+ * Do not check Sub-recipient Budget Justification if no Subrecipient Budget saved.
+ * Check before PCV-00285. If Subrecipient Org Justification is missing will not check the limit.
+ */
+activation-group "SubrecipientBudgetJustification"
+salience 1
+when
+
+	$proposal : Proposal ( 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA",
+		$submission : submission != null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD, 
+		$fundingMechanism : fundingMechanism !=null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Conference" 
+			|| == "Equipment"  
+			|| == "International Travel" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$budget : budget != null, 
+		$awardeeOrg : awardeeOrganization != null, 
+		//Check sub-recipient org budget existence.
+		isSubrecipientBudgetExist($budget, $awardeeOrg),
+		$sectionContent : sectionContent, 
+		//Check sub-recipient org budget justification existence.
+		!isSubrecipientBudgetJustificationExist($budget, $sectionContent, $awardeeOrg),
+		$findings : proposalFindings
+	);
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+        $proposalFinding.setFindingCode("PCV-00284");
+        $proposalFinding.setFindingLevel(FindingLevel.ERROR);
+        $proposalFinding.setMessage("No Budget Justification for Subrecipient Organization(s) - The Budget Justification for the Subrecipient Organization(s) has not been provided and is required for RAPID, EAGER, Conference, Equipment, International Travel, Research and Ideas Lab types of Funding Mechanisms. The amounts requested for each budget line item must be documented and justified. To correct this error, please upload a Budget Justification for Subrecipient Organization(s).");
+	    insert($proposalFinding );
+        $proposal.getProposalFindings().add($proposalFinding);
+end

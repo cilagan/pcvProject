@@ -1,0 +1,17 @@
+package nsf.pcvproject;
+import java.util.List
+import java.math.BigDecimal
+
+function BigDecimal calculateIndirectCosts(List costs) {
+	BigDecimal total = new BigDecimal("0");
+	if(costs != null) {
+		for (Object obj : costs) {
+			IndirectCost cost = (IndirectCost) obj;
+			if (cost.getDollarRequested() != null) {
+				total = total.add(cost.getDollarRequested());
+			}
+		}
+	}
+	return total;
+}
+

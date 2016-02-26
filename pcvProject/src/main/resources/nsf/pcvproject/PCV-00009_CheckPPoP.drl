@@ -1,0 +1,35 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00009_CheckPPoP"
+when
+   $proposal : Proposal( 		
+		$submission : submission != null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD, 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA",
+		$fundingMechanism: fundingMechanism != null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Conference" 
+			|| == "Equipment" 
+			|| == "International Travel" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$coverSheet : coversheet != null,
+		coversheet.performancePrimaryPlaceAddress != null,
+		$ppop : coversheet.performancePrimaryPlaceAddress.country != null,
+		//check both conditions 
+		coversheet.internationalCooperativeActivitiesCountriesExists==false && isForeignCountryCode($ppop),
+		$findings : proposalFindings)
+then
+
+        ProposalFinding $proposalFinding = new ProposalFinding();
+        $proposalFinding.setFindingCode("PCV-00009");
+        $proposalFinding.setFindingLevel(FindingLevel.WARN);
+        $proposalFinding.setMessage("International Activities Country Name(s) box on the \"Remainder of the Cover Sheet\" is not checked - The International Activities Country Name(s) box is not checked on the \"Remainder of the Cover Sheet\" but the Primary Place of Performance on the Cover Sheet is outside the U.S., its territories or possessions. To correct this warning, please check the International Activities Country Name(s) box on the \"Remainder of the Cover Sheet\" and list the country where the primary place of performance is located.");
+	    insert($proposalFinding );
+        $proposal.getProposalFindings().add($proposalFinding);
+end

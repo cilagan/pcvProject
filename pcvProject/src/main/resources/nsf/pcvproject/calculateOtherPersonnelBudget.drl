@@ -1,0 +1,10 @@
+package nsf.pcvproject;
+import java.math.BigDecimal
+
+function BigDecimal calculateOtherPersonnelBudget(BudgetInfo budgetItem) {
+	if (budgetItem != null && budgetItem.getRequestedDollars() != null) {
+		return budgetItem.getRequestedDollars();
+	}
+	return new BigDecimal("0");
+}
+

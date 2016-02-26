@@ -1,0 +1,29 @@
+package nsf.pcvproject;
+import java.math.BigDecimal;
+/*
+	Returns false if other personnel have funds allocated but no months assigned.  True otherwise.
+*/
+function boolean checkPersonnelMonths(BudgetInfo budget) {
+	if(budget != null) {
+		if(budget.getRequestedDollars() != null && budget.getRequestedDollars().compareTo(BigDecimal.ZERO) > 0) {
+			BigDecimal totalMonths = new BigDecimal("0");
+			if(budget.getCalendarMonths() != null) {
+				totalMonths = totalMonths.add(budget.getCalendarMonths());
+			}
+			if(budget.getAcademicMonths() != null) {
+				totalMonths = totalMonths.add(budget.getAcademicMonths());
+			}
+			if(budget.getSummerMonths() != null) {
+				totalMonths = totalMonths.add(budget.getSummerMonths());
+			}
+			if(totalMonths.compareTo(BigDecimal.ZERO) <= 0) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			return true;
+		}
+	}
+	return true;
+}

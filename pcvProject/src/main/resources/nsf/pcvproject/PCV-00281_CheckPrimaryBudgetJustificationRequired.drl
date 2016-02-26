@@ -1,0 +1,47 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00281_CheckPrimaryBudgetJustificationRequired"
+/*
+ * Activation-group "PrimaryBudgetJustification"
+ * - PCV-00281_BudgetJustificationPrimaryOrganizationRequired
+ * - PCV-00283_CheckBudgetJustificationPrimaryOrganizationPageLimit
+ * Always check Primary Budget Justification even no budget saved.
+ * Check this rule before PCV-00283. 
+ * If no Primary Budget Justification should not check the page limit.
+ */
+activation-group "PrimaryBudgetJustification"
+salience 1
+when
+
+	$proposal : Proposal ( 
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA",
+		$submission : submission != null, 
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR 
+			|| == SubmissionType.COLLABORATIVE_LEAD 
+			|| == SubmissionType.COLLABORATIVE_NON_LEAD, 
+		$fundingMechanism : fundingMechanism !=null, 
+			fundingMechanism == "RAPID" 
+			|| == "EAGER" 
+			|| == "Conference" 
+			|| == "Equipment"  
+			|| == "International Travel" 
+			|| == "Research - other than RAPID or EAGER" 
+			|| == "Ideas Lab",
+		$sectionContent : sectionContent, 
+		$awardeeOrg : awardeeOrganization, 
+		//Check existence of Primary Budget Justification
+		!isPrimaryBudgetJustificationExist($sectionContent, $awardeeOrg),
+		$findings : proposalFindings
+	);
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+        $proposalFinding.setFindingCode("PCV-00281");
+        $proposalFinding.setFindingLevel(FindingLevel.ERROR);
+        $proposalFinding.setMessage("No Budget Justification for the Primary Organization - The Budget Justification for the Primary Organization has not been provided and is required for RAPID, EAGER, Conference, Equipment, International Travel, Research and Ideas Lab types of Funding Mechanisms. The amounts requested for each budget line item must be documented and justified. To correct this error, please upload a Budget Justification for the Primary Organization." );
+     	insert($proposalFinding );
+        $proposal.getProposalFindings().add($proposalFinding);
+end

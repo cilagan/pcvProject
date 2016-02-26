@@ -1,0 +1,20 @@
+package nsf.pcvproject;
+import java.math.BigDecimal
+
+/*
+Calculates the total of all budget years for a specified organization.
+If no orgId is provided, the total is for all organizations.
+*/
+
+function BigDecimal calculateBudgetTotal(Budget budget, String orgId) {
+	BigDecimal total = new BigDecimal ("0");
+	if(budget != null && budget.getBudgetRecordList() != null) {
+		for (BudgetRecord br : budget.getBudgetRecordList()) {
+			if(orgId == null || br.getPerformingOrganizationId().equals(orgId)) {
+				total = total.add(calculateBudgetYear(br));
+			}
+		}
+	}
+	return total;
+}
+

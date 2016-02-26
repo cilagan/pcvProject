@@ -1,0 +1,34 @@
+package nsf.pcvproject;
+
+import java.util.List;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
+
+/*
+ * Checks if the Primary Organization budget justifications Exists
+ * Copied from FactModelUtil.hasBudgJustForPrimaryInst
+ * Rules : activation-group "PrimaryBudgetJustification"
+ * @since 11/05/2014
+ */
+function boolean isPrimaryBudgetJustificationExist(SectionContent sectionContent, AwardeeOrganization awardeeOrg) {
+	if(sectionContent == null 
+		|| CollectionUtils.isEmpty(sectionContent.getBudgetJustifications()) 
+		|| awardeeOrg == null
+		|| StringUtils.isBlank(awardeeOrg.getOrganizationId()))  
+		return false;
+
+	List budgJustList = sectionContent.getBudgetJustifications();
+	String primaryOrgId = awardeeOrg.getOrganizationId();
+	for(int i = 0; i < budgJustList.size(); i++) {
+		BudgetJustification bj = (BudgetJustification)budgJustList.get(i);
+		//look for primary organization and check if it is empty.
+		if(StringUtils.isNotBlank(bj.getInstId()) 
+				&& StringUtils.equals(bj.getInstId(), primaryOrgId ) 
+				&& (bj.getSectionContentType() == SectionContentType.PDF 
+					|| bj.getSectionContentType() == SectionContentType.TEXT)){
+			return true;
+		}
+	}
+
+	return false;
+}

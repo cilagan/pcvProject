@@ -1,0 +1,17 @@
+package nsf.pcvproject;
+import java.math.BigDecimal
+
+function BigDecimal calculateSeniorPersonnelBudget(List budget) {
+	BigDecimal total = new BigDecimal("0");
+	if (budget != null) {
+		for (Object obj: budget) {
+			SeniorPersonnelBudget person = (SeniorPersonnelBudget) obj;
+			if (person.getRequestedDollars() != null) {
+				total = total.add(person.getRequestedDollars());
+			}
+		}
+	}
+	return total;
+}
+
+

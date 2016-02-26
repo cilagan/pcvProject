@@ -1,0 +1,29 @@
+package nsf.pcvproject;
+import java.math.BigDecimal
+
+function BigDecimal calculateOtherDirectCosts(OtherDirectCost directCost) {
+	BigDecimal total = new BigDecimal("0");
+	if (directCost != null) {
+		if (directCost.getMaterialsSuppliesDollars() != null) {
+			total = total.add(directCost.getMaterialsSuppliesDollars());
+		}
+		if (directCost.getPublicationDocumentationDollars() != null) {
+			total = total.add(directCost.getPublicationDocumentationDollars());
+		}
+		if (directCost.getConsultantServicesDollars() != null) {
+			total = total.add(directCost.getConsultantServicesDollars());
+		}
+		if (directCost.getComputerServicesDollars() != null) {
+			total = total.add(directCost.getComputerServicesDollars());
+		}
+		if (directCost.getSubcontractsDollars() != null) {
+			total = total.add(directCost.getSubcontractsDollars());
+		}
+		if (directCost.getOtherDirectCostDollars() != null) {
+			total = total.add(directCost.getOtherDirectCostDollars());
+		}
+	}
+	return total;
+}
+
+

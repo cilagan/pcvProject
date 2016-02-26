@@ -1,0 +1,26 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00122_CheckProjectDescriptionPageLimit_NSF_14-536"
+when
+
+	 $proposal : Proposal( $submission : submission != null, 
+				submission.type == SubmissionType.FULL_PROPOSAL 
+				|| == SubmissionType.RENEWAL 
+				|| == SubmissionType.RENEWAL_ABR,  
+	$fundingOpportunity : fundingOpportunity != null, 
+		fundingOpportunity.fundingOpportunityId == "NSF 14-536", 
+	$sectionContent : sectionContent != null,
+			sectionContent.projectDescriptionPageCount > 30,
+	$findings : proposalFindings )
+
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+	$proposalFinding.setFindingCode( "PCV-00122" );
+	$proposalFinding.setFindingLevel( FindingLevel.WARN);
+	$proposalFinding.setMessage( "Project Description Exceeds Page Limit - The Project Description entered exceeds the maximum allowable length of 30 pages for Program Solicitation 14-536." );
+	
+	insert($proposalFinding );
+	$proposal.getProposalFindings().add($proposalFinding);
+end
+

@@ -1,0 +1,29 @@
+package nsf.pcvproject;
+import gov.nsf.pcv.*;
+rule "PCV-00123_CheckProjectDescriptionPageLimitRAPID"
+when
+
+	$proposal : Proposal (
+		$submission : submission != null,
+			submission.type == SubmissionType.FULL_PROPOSAL 
+			|| == SubmissionType.RENEWAL 
+			|| == SubmissionType.RENEWAL_ABR
+			|| == SubmissionType.COLLABORATIVE_LEAD,
+		$fundingOpportunity : fundingOpportunity != null, 
+			fundingOpportunity.fundingOpportunityType == "PD" || == "PA",
+		$fundingMechanism : fundingMechanism != null, 
+			$fundingMechanism == "RAPID",
+		$sectionContent : sectionContent != null, 
+			sectionContent.projectDescription == SectionContentType.PDF,
+			sectionContent.projectDescriptionPageCount > 5,
+		$findings : proposalFindings 
+	)
+then
+
+	ProposalFinding $proposalFinding = new ProposalFinding();
+	$proposalFinding.setFindingCode("PCV-00123");
+	$proposalFinding.setFindingLevel(FindingLevel.ERROR);
+	$proposalFinding.setMessage("Project Description Exceeds Page Limit - The  Project Description uploaded exceeds the maximum allowable length of 5 pages for a RAPID proposal.");
+	insert($proposalFinding );
+	$proposal.getProposalFindings().add($proposalFinding);
+end
